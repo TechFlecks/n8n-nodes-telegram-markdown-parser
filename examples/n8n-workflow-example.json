@@ -1,0 +1,136 @@
+{
+  "name": "TechFlecks Telegram Markdown V2 Parser Examples",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "parseToHtml",
+        "inputText": "*Welcome* to __TechFlecks__! Check out our [website](https://techflecks.com) for more info about our `Make by You` product suite.",
+        "additionalOptions": {
+          "preserveWhitespace": true,
+          "stripInvalidTags": true
+        }
+      },
+      "id": "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6",
+      "name": "Parse to HTML",
+      "type": "@techflecks/n8n-nodes-telegram-markdownv2-parser.telegramMarkdownV2Parser",
+      "typeVersion": 1,
+      "position": [
+        400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "parseToPlainText",
+        "inputText": "={{$node[\"Parse to HTML\"].json[\"originalText\"]}}"
+      },
+      "id": "2a3b4c5d-6e7f-8g9h-0i1j-k2l3m4n5o6p7",
+      "name": "Parse to Plain Text",
+      "type": "@techflecks/n8n-nodes-telegram-markdownv2-parser.telegramMarkdownV2Parser",
+      "typeVersion": 1,
+      "position": [
+        600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "escapeMarkdown",
+        "inputText": "Price: $10.99 (includes * and _ special characters)"
+      },
+      "id": "3a4b5c6d-7e8f-9g0h-1i2j-k3l4m5n6o7p8",
+      "name": "Escape Special Characters",
+      "type": "@techflecks/n8n-nodes-telegram-markdownv2-parser.telegramMarkdownV2Parser",
+      "typeVersion": 1,
+      "position": [
+        400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "validateMarkdown",
+        "inputText": "*Bold text with missing closing asterisk"
+      },
+      "id": "4a5b6c7d-8e9f-0g1h-2i3j-k4l5m6n7o8p9",
+      "name": "Validate Markdown Syntax",
+      "type": "@techflecks/n8n-nodes-telegram-markdownv2-parser.telegramMarkdownV2Parser",
+      "typeVersion": 1,
+      "position": [
+        600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "markdown_text",
+              "value": "*Welcome* to our platform! Use code `WELCOME10` for ~~20%~~ __30%__ off your first purchase. [Learn more](https://techflecks.com)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a6b7c8d-9e0f-1g2h-3i4j-k5l6m7n8o9p0",
+      "name": "Sample Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Sample Data": {
+      "main": [
+        [
+          {
+            "node": "Parse to HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Parse to Plain Text", 
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse to HTML": {
+      "main": [
+        [
+          {
+            "node": "Parse to Plain Text",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "techflecks-markdown-v2-parser-example",
+  "tags": [
+    {
+      "id": "techflecks",
+      "name": "TechFlecks"
+    },
+    {
+      "id": "telegram",
+      "name": "Telegram"
+    },
+    {
+      "id": "markdown",
+      "name": "Markdown"
+    }
+  ]
+}

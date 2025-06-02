@@ -1,0 +1,59 @@
+{
+  "name": "@techflecks/n8n-nodes-telegram-markdownv2-parser",
+  "version": "1.0.0",
+  "description": "n8n node for parsing Telegram Markdown V2 format - part of Make by You product suite",
+  "keywords": [
+    "n8n-community-node-package",
+    "telegram",
+    "markdown",
+    "parser",
+    "techflecks",
+    "make-by-you"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/TechFlecks/n8n-nodes-telegram-markdownv2-parser#readme",
+  "author": {
+    "name": "TechFlecks",
+    "email": "support@techflecks.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TechFlecks/n8n-nodes-telegram-markdownv2-parser.git"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "main": "index.js",  "scripts": {
+    "build": "npx rimraf dist && tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm build && npm lint -c .eslintrc.prepublish.js nodes credentials package.json",
+    "test": "jest",
+    "demo": "node demo.js",
+    "demo-standalone": "node demo-standalone.js"
+  },
+  "files": [
+    "dist"
+  ],  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [],
+    "nodes": [
+      "dist/nodes/TelegramMarkdownV2Parser/TelegramMarkdownV2Parser.node.js"
+    ]
+  },  "devDependencies": {
+    "@types/jest": "^29.5.5",
+    "@typescript-eslint/parser": "~8.32.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
