@@ -7,14 +7,14 @@
     "telegram",
     "markdown",
     "parser",
-    "techflecks",
-    "make-by-you"
+    "techflecks"
   ],
   "license": "MIT",
   "homepage": "https://github.com/TechFlecks/n8n-nodes-telegram-markdownv2-parser#readme",
   "author": {
     "name": "TechFlecks",
-    "email": "support@techflecks.com"
+    "email": "support@techflecks.com",
+    "url": "https:/www.techflecks.com"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
   "engines": {
     "node": ">=20.15"
   },
-  "main": "index.js",  "scripts": {
+  "main": "index.js",
+  "scripts": {
     "build": "npx rimraf dist && tsc && gulp build:icons",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
@@ -36,13 +37,15 @@
   },
   "files": [
     "dist"
-  ],  "n8n": {
+  ],
+  "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [],
     "nodes": [
       "dist/nodes/TelegramMarkdownV2Parser/TelegramMarkdownV2Parser.node.js"
     ]
-  },  "devDependencies": {
+  },
+  "devDependencies": {
     "@types/jest": "^29.5.5",
     "@typescript-eslint/parser": "~8.32.0",
     "eslint": "^8.57.0",

@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Telegram logo elements -->
-  <circle cx="12" cy="12" r="10" fill="#0088cc"/>
-  <path d="M8.5 12.5l3 3L16 8" stroke="white" stroke-width="2" fill="none"/>
-  <!-- Markdown symbols -->
-  <text x="4" y="20" font-family="monospace" font-size="6" fill="#333">MD</text>
-  <path d="M18 4h2v2h-2V4zM18 8h2v2h-2V8zM18 12h2v2h-2v-2z" fill="#666"/>
-</svg>
