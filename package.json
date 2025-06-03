@@ -1,6 +1,6 @@
 {
   "name": "@techflecks/n8n-nodes-telegram-markdown-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TechFlecks Telegram Markdown Parser - Convert standard markdown to Telegram MarkdownV2 format",
   "keywords": [
     "n8n-community-node-package",
