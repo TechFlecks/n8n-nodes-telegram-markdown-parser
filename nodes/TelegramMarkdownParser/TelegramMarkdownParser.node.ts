@@ -200,6 +200,9 @@ export class TelegramMarkdownParser implements INodeType {
 
 		let converted = text;
 
+		// Pre-validate and fix common issues
+		converted = this.preProcessText(converted);
+
 		// Convert HTML tags to Telegram MarkdownV2 if enabled
 		if (options.convertHtmlTags) {
 			converted = this.convertHtmlToTelegramMd(converted);
@@ -234,27 +237,28 @@ export class TelegramMarkdownParser implements INodeType {
 		// Convert standard markdown formatting to Telegram MarkdownV2
 
 		// Bold + Italic combinations first (to avoid conflicts)
-		converted = converted.replace(/\*\*\*([^*]+)\*\*\*/g, '*_$1_*');
+		converted = converted.replace(/\*\*\*([^*\n]+?)\*\*\*/g, '*_$1_*');
 
 		// Store original italic patterns before bold conversion to prevent conflicts
 		const originalItalics: string[] = [];
 		const italicPlaceholder = '___ITALIC_PH_';
-		converted = converted.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, (match, content) => {
+		// Improved italic matching - only match when we have proper pairs
+		converted = converted.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, (match, content) => {
 			const telegramItalic = `_${content}_`;
 			originalItalics.push(telegramItalic);
 			return italicPlaceholder + (originalItalics.length - 1) + '___';
 		});
 
-		// Bold: **text** -> *text* (but not __text__ which might be underline in HTML conversion)
-		converted = converted.replace(/\*\*([^*]+)\*\*/g, '*$1*');
+		// Bold: **text** -> *text* (improved to ensure matching pairs)
+		converted = converted.replace(/\*\*([^*\n]+?)\*\*/g, '*$1*');
 		// Underline: __text__ -> *text* (but avoid matching placeholders like ___PLACEHOLDER___)
-		converted = converted.replace(/(?<!_)__([^_]+)__(?!_)/g, '*$1*');
+		converted = converted.replace(/(?<!_)__([^_\n]+?)__(?!_)/g, '*$1*');
 
 		// Headers (convert to bold since Telegram doesn't support headers) - after italic processing
 		converted = converted.replace(/^#{1,6}\s+(.+)$/gm, '*$1*');
 
-		// Strikethrough: ~~text~~ -> ~text~
-		converted = converted.replace(/~~([^~]+)~~/g, '~$1~');
+		// Strikethrough: ~~text~~ -> ~text~ (improved to ensure matching pairs)
+		converted = converted.replace(/~~([^~\n]+?)~~/g, '~$1~');
 
 		// Auto-escape special characters if enabled (but avoid escaping placeholders)
 		if (options.autoEscape !== false) {
@@ -290,6 +294,33 @@ export class TelegramMarkdownParser implements INodeType {
 		}
 
 		return converted;
+	}
+
+	/**
+	 * Pre-process text to fix common issues that cause Telegram parsing errors
+	 */
+	private static preProcessText(text: string): string {
+		let processed = text;
+
+		// Fix unmatched asterisks by escaping single asterisks that aren't part of valid markdown
+		// This prevents "Can't find end of Bold entity" errors
+		processed = processed.replace(/(?<!\\)\*(?!\*)/g, (match, offset, string) => {
+			// Count asterisks before and after this position
+			const before = string.substring(0, offset);
+			const after = string.substring(offset + 1);
+
+			const asterisksBefore = (before.match(/(?<!\\)\*/g) || []).length;
+			const asterisksAfter = (after.match(/(?<!\\)\*/g) || []).length;
+
+			// If we have an odd number of asterisks total, escape this one
+			if ((asterisksBefore + asterisksAfter + 1) % 2 !== 0) {
+				return '\\*';
+			}
+
+			return match;
+		});
+
+		return processed;
 	}
 
 	/**
@@ -406,9 +437,18 @@ export class TelegramMarkdownParser implements INodeType {
 			});
 		});
 
+		// Store markdown links temporarily to avoid escaping parentheses inside them
+		const markdownLinks: string[] = [];
+		const linkTempPlaceholder = '🔗LINK🔗';
+		escaped = escaped.replace(/\[([^\]]*)\]\(([^)]*)\)/g, (match) => {
+			markdownLinks.push(match);
+			return linkTempPlaceholder + (markdownLinks.length - 1) + '🔗';
+		});
+
 		// Escape characters that should always be escaped in telegram (not part of markdown formatting)
 		escaped = escaped.replace(/\./g, '\\.');
 		escaped = escaped.replace(/!/g, '\\!');
+		escaped = escaped.replace(/\?/g, '\\?');
 		escaped = escaped.replace(/\+/g, '\\+');
 		escaped = escaped.replace(/=/g, '\\=');
 		escaped = escaped.replace(/\|/g, '\\|');
@@ -417,16 +457,21 @@ export class TelegramMarkdownParser implements INodeType {
 		escaped = escaped.replace(/>/g, '\\>');
 		escaped = escaped.replace(/#/g, '\\#');
 
-		// Escape parentheses that are not part of links [text](url)
-		escaped = escaped.replace(/\((?![^)]*\))/g, '\\(');
-		escaped = escaped.replace(/\)(?<!\([^(]*)/g, '\\)');
+		// Escape ALL parentheses since we've already protected valid markdown links
+		escaped = escaped.replace(/\(/g, '\\(');
+		escaped = escaped.replace(/\)/g, '\\)');
 
-		// Escape brackets that are not part of links [text](url)
-		escaped = escaped.replace(/\[(?![^\]]*\]\([^)]*\))/g, '\\[');
-		escaped = escaped.replace(/\](?!\([^)]*\))/g, '\\]');
+		// Escape ALL square brackets since we've already protected valid markdown links
+		escaped = escaped.replace(/\[/g, '\\[');
+		escaped = escaped.replace(/\]/g, '\\]');
 
 		// Escape minus signs that are not part of strikethrough
 		escaped = escaped.replace(/(?<!~)-(?!~)/g, '\\-');
+
+		// Restore markdown links
+		for (let i = 0; i < markdownLinks.length; i++) {
+			escaped = escaped.replace(linkTempPlaceholder + i + '🔗', markdownLinks[i]);
+		}
 
 		// Restore all placeholders
 		for (let i = 0; i < allPlaceholders.length; i++) {
@@ -452,26 +497,44 @@ export class TelegramMarkdownParser implements INodeType {
 
 		// Check for unmatched formatting pairs
 		const formatChecks = [
-			{ regex: /\*([^*]*?)\*/g, name: 'bold', symbol: '*' },
-			{ regex: /_([^_]*?)_/g, name: 'italic', symbol: '_' },
-			{ regex: /__([^_]*?)__/g, name: 'underline', symbol: '__' },
-			{ regex: /~([^~]*?)~/g, name: 'strikethrough', symbol: '~' },
-			{ regex: /`([^`]*?)`/g, name: 'code', symbol: '`' },
-			{ regex: /\|\|([^|]*?)\|\|/g, name: 'spoiler', symbol: '||' },
+			{ regex: /\*([^*\n]*?)\*/g, name: 'bold', symbol: '*', pairs: true },
+			{ regex: /_([^_\n]*?)_/g, name: 'italic', symbol: '_', pairs: true },
+			{ regex: /__([^_\n]*?)__/g, name: 'underline', symbol: '__', pairs: true },
+			{ regex: /~([^~\n]*?)~/g, name: 'strikethrough', symbol: '~', pairs: true },
+			{ regex: /`([^`\n]*?)`/g, name: 'code', symbol: '`', pairs: true },
+			{ regex: /\|\|([^|\n]*?)\|\|/g, name: 'spoiler', symbol: '||', pairs: true },
 		];
-		formatChecks.forEach((check) => {
-			const text_copy = text;
 
-			// Count opening and closing markers
-			const regex = new RegExp(check.symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-			const matches = text_copy.match(regex);
+		formatChecks.forEach((check) => {
+			let textCopy = text;
+
+			// Remove valid pairs first
+			textCopy = textCopy.replace(check.regex, '');
+
+			// Count remaining unmatched markers
+			const escapedSymbol = check.symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			const regex = new RegExp(escapedSymbol, 'g');
+			const matches = textCopy.match(regex);
 
 			if (matches) {
-				if (matches.length % 2 !== 0) {
-					errors.push(`Unmatched ${check.name} formatting - missing closing ${check.symbol}`);
+				if (check.pairs && matches.length % 2 !== 0) {
+					errors.push(
+						`Unmatched ${check.name} formatting - found ${matches.length} unmatched '${check.symbol}' markers`,
+					);
 				}
 			}
 		});
+
+		// Additional check for unescaped asterisks (common bold formatting issue)
+		const unescapedAsterisks = text.match(/(?<!\\)\*(?!\*)/g);
+		if (unescapedAsterisks && unescapedAsterisks.length % 2 !== 0) {
+			errors.push(
+				'Unmatched asterisk (*) markers detected - this will cause bold formatting errors',
+			);
+			suggestions.push(
+				'Ensure all asterisks are either escaped (\\*) or properly paired for bold formatting',
+			);
+		}
 
 		// Check for invalid characters that aren't escaped
 		const unescapedSpecialChars = text.match(/(?<!\\)[_*\[\]()~`>#+=\-|{}.!]/g);

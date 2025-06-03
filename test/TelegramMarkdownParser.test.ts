@@ -231,4 +231,75 @@ Check out [this link](https://techflecks.com)!
 			expect(result.isValid).toBe(true);
 		});
 	});
+
+	describe('GitHub Issues Fixes', () => {
+		test('should fix Issue #1: Escape parentheses correctly', () => {
+			// Test case based on Issue #1: "Character '(' is reserved and must be escaped"
+			const problematicText =
+				"Since you mentioned AI, let's dive a little deeper. To give you the most relevant information, could you tell me what aspects of AI are most interesting to you? For example, are you curious about:\n\n*   *Specific AI applications?* (e.g., chatbots, image recognition, predictive analytics)\n*   *The types of AI services we offer?* (e.g., custom model development, AI integration)\n*   *How AI can benefit your particular industry or business?*";
+
+			const result = (TelegramMarkdownParser as any).convertToTelegramMarkdownV2(problematicText);
+
+			// Check that all parentheses are escaped
+			expect(result).toContain('\\(e\\.g\\.');
+			expect(result).toContain('\\)');
+			// Check that question marks are escaped
+			expect(result).toContain('\\?');
+			// Check that the result doesn't break Telegram parsing (no unescaped special chars)
+			expect(result).not.toMatch(/(?<!\\)[()]/);
+		});
+
+		test('should fix Issue #2: Handle unmatched bold entities', () => {
+			// Test case for Issue #2: "Can't find end of Bold entity"
+			const textWithUnmatchedAsterisk =
+				'This text has an unmatched * asterisk that should be escaped';
+
+			const result = (TelegramMarkdownParser as any).convertToTelegramMarkdownV2(
+				textWithUnmatchedAsterisk,
+			);
+
+			// The unmatched asterisk should be escaped
+			expect(result).toContain('\\*');
+			expect(result).not.toMatch(/(?<!\\)\*(?!\*)/); // No unescaped single asterisks
+		});
+
+		test('should handle mixed formatting and special characters', () => {
+			const complexText =
+				'**Bold text** with (parentheses) and *italic* text. Also has! special? characters.';
+
+			const result = (TelegramMarkdownParser as any).convertToTelegramMarkdownV2(complexText);
+
+			// Bold should be converted
+			expect(result).toContain('*Bold text*');
+			// Italic should be converted
+			expect(result).toContain('_italic_');
+			// Parentheses should be escaped
+			expect(result).toContain('\\(parentheses\\)');
+			// Special chars should be escaped
+			expect(result).toContain('\\!');
+			expect(result).toContain('\\?');
+		});
+
+		test('should validate and detect formatting issues', () => {
+			const invalidText = 'This has unmatched * bold and (unescaped) parentheses';
+
+			const validation = (TelegramMarkdownParser as any).validateTelegramMarkdown(invalidText);
+
+			expect(validation.isValid).toBe(false);
+			expect(validation.errors.length).toBeGreaterThan(0);
+			expect(validation.errors.some((error: string) => error.includes('asterisk'))).toBe(true);
+		});
+
+		test('should preserve valid markdown links while escaping other parentheses', () => {
+			const textWithLinks =
+				'Check out [Google](https://google.com) and also (other parentheses) that need escaping.';
+
+			const result = (TelegramMarkdownParser as any).convertToTelegramMarkdownV2(textWithLinks);
+
+			// Valid markdown link should be preserved
+			expect(result).toContain('[Google](https://google.com)');
+			// Other parentheses should be escaped
+			expect(result).toContain('\\(other parentheses\\)');
+		});
+	});
 });
