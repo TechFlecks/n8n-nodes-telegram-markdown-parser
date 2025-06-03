@@ -34,7 +34,7 @@ This document outlines the complete licensing implementation for the TechFlecks 
 All key source files now include TechFlecks license headers:
 
 1. **nodes/TelegramMarkdownParser/TelegramMarkdownParser.node.ts**
-2. **demo.js**
+2. **demo.js** 
 3. **demo-standalone.js**
 4. **index.js**
 5. **test/TelegramMarkdownParser.test.ts**
@@ -88,7 +88,7 @@ All files should include:
 For licensing questions or enterprise licensing:
 
 - **Legal**: legal@techflecks.com
-- **Support**: support@techflecks.com
+- **Support**: support@techflecks.com  
 - **Website**: https://www.techflecks.com
 
 ---

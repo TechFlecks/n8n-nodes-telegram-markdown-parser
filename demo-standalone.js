@@ -1,172 +1,197 @@
 #!/usr/bin/env node
 
 /**
- * Standalone Demo script for TechFlecks n8n Telegram Markdown V2 Parser
- * This script demonstrates the core functionality without n8n dependencies
+ * TechFlecks Telegram Markdown Parser - Standalone Demo
+ *
+ * Copyright © 2025 TechFlecks Technologies
+ * Licensed under TechFlecks Software License Agreement v1.0
+ *
+ * This standalone demo shows how to use the TechFlecks Telegram Markdown Parser
+ * as a standalone library without n8n. Run with: npm run demo-standalone
+ *
+ * For license terms, see LICENSE.md
+ * Contact: support@techflecks.com
  */
 
-console.log('🚀 TechFlecks n8n Telegram Markdown V2 Parser Demo\n');
-console.log('================================================\n');
+const TelegramMarkdownParser = require('./dist/nodes/TelegramMarkdownParser/TelegramMarkdownParser.node.js').TelegramMarkdownParser;
 
-// Inline parser implementation for demo purposes
-class MarkdownV2Parser {
-    static parseMarkdownV2ToHtml(text, options = {}) {
-        let html = text;
+console.log('🔧 TechFlecks Telegram Markdown Parser - Standalone Usage Demo');
+console.log('=================================================================');
+console.log();
 
-        // Handle bold text: *bold* or **bold**
-        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+console.log('📋 This demo shows how to use the parser as a standalone library');
+console.log('   (without n8n workflow engine)');
+console.log();
 
-        // Handle italic text: _italic_ or __italic__
-        html = html.replace(/__([^_]+)__/g, '<em>$1</em>');
-        html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
-
-        // Handle underline text: __underline__
-        html = html.replace(/__(.*?)__/g, '<u>$1</u>');
-
-        // Handle strikethrough text: ~~strikethrough~~
-        html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
-
-        // Handle inline code: `code`
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-        // Handle code blocks: ```language\ncode\n```
-        html = html.replace(/```(\w+)?\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-
-        // Handle links: [text](url)
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-
-        // Handle spoilers: ||spoiler||
-        html = html.replace(/\|\|([^|]+)\|\|/g, '<span class="spoiler">$1</span>');
-
-        return html;
-    }
-
-    static parseMarkdownV2ToPlainText(text, options = {}) {
-        let plain = text;
-
-        // Remove all markdown formatting
-        plain = plain.replace(/\*\*([^*]+)\*\*/g, '$1');
-        plain = plain.replace(/\*([^*]+)\*/g, '$1');
-        plain = plain.replace(/__([^_]+)__/g, '$1');
-        plain = plain.replace(/_([^_]+)_/g, '$1');
-        plain = plain.replace(/~~(.*?)~~/g, '$1');
-        plain = plain.replace(/`([^`]+)`/g, '$1');
-        plain = plain.replace(/```[\s\S]*?```/g, '[code block]');
-        plain = plain.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-        plain = plain.replace(/\|\|([^|]+)\|\|/g, '$1');
-
-        return plain;
-    }
-
-    static escapeMarkdownV2(text) {
-        const specialChars = /([*_`\[\]()~>#+\-=|{}.!\\])/g;
-        return text.replace(specialChars, '\\$1');
-    }
-
-    static validateMarkdownV2(text) {
-        const errors = [];
-        const warnings = [];
-
-        // Check for unmatched asterisks
-        const asteriskCount = (text.match(/\*/g) || []).length;
-        if (asteriskCount % 2 !== 0) {
-            errors.push('Unmatched asterisks for bold formatting');
-        }
-
-        // Check for unmatched underscores
-        const underscoreCount = (text.match(/_/g) || []).length;
-        if (underscoreCount % 2 !== 0) {
-            errors.push('Unmatched underscores for italic formatting');
-        }
-
-        // Check for unmatched backticks
-        const backtickCount = (text.match(/`/g) || []).length;
-        if (backtickCount % 2 !== 0) {
-            errors.push('Unmatched backticks for code formatting');
-        }
-
-        // Check for unescaped special characters
-        const unescapedChars = text.match(/[*_`\[\]()~>#+\-=|{}.!\\]/g);
-        if (unescapedChars && unescapedChars.length > 0) {
-            warnings.push('Text contains special characters that may need escaping');
-        }
-
-        return {
-            isValid: errors.length === 0,
-            errors,
-            warnings,
-        };
-    }
-}
-
-// Sample Markdown V2 texts for demonstration
-const samples = [
-    {
-        name: 'Basic Formatting',
-        text: '*Bold text* and _italic text_ with `inline code`'
-    },
-    {
-        name: 'Complex Formatting',
-        text: '*Welcome* to __TechFlecks__! Check out our [website](https://techflecks.com) for ||secret deals||'
-    },
-    {
-        name: 'Code Block',
-        text: 'Here is some code:\n```javascript\nconsole.log("Hello Make by You!");\n```'
-    },
-    {
-        name: 'Mixed Content',
-        text: '~~Old price: $19.99~~ *New price: $9.99* - Use code `SAVE10` for extra discount!'
-    },
-    {
-        name: 'Special Characters (needs escaping)',
-        text: 'Price: $10.99 (includes * and _ characters)'
-    }
+// Available static methods
+console.log('🛠️  Available Static Methods:');
+console.log('----------------------------------------');
+const methods = [
+    'convertToTelegramMarkdownV2',
+    'convertHtmlToTelegramMd',
+    'escapeForTelegram',
+    'validateTelegramMarkdown',
+    'escapeSpecialCharactersOnly'
 ];
 
-// Demonstrate each operation
-samples.forEach((sample, index) => {
-    console.log(`\n${index + 1}. ${sample.name}`);
-    console.log('━'.repeat(50));
-    console.log(`📝 Original: ${sample.text}`);
-    
-    try {
-        // Parse to HTML
-        const htmlResult = MarkdownV2Parser.parseMarkdownV2ToHtml(sample.text);
-        console.log(`🌐 HTML: ${htmlResult}`);
-        
-        // Parse to plain text
-        const plainResult = MarkdownV2Parser.parseMarkdownV2ToPlainText(sample.text);
-        console.log(`📄 Plain: ${plainResult}`);
-        
-        // Validate
-        const validation = MarkdownV2Parser.validateMarkdownV2(sample.text);
-        console.log(`✅ Valid: ${validation.isValid}`);
-        if (validation.errors.length > 0) {
-            console.log(`❌ Errors: ${validation.errors.join(', ')}`);
-        }
-        if (validation.warnings.length > 0) {
-            console.log(`⚠️  Warnings: ${validation.warnings.join(', ')}`);
-        }
-        
-    } catch (error) {
-        console.log(`❌ Error: ${error.message}`);
+methods.forEach((method, index) => {
+    console.log((index + 1) + '. TelegramMarkdownParser.' + method + '()');
+});
+console.log();
+
+// Example 1: Direct markdown conversion
+console.log('📝 Example 1: Direct Markdown Conversion');
+console.log('--------------------------------------------------');
+
+const markdownText = '# TechFlecks Newsletter\n\n## This Week\'s Updates\n\nWe\'re excited to share **major improvements** to our platform:\n\n### New Features\n- *Enhanced security* with multi-factor authentication\n- **Real-time notifications** for critical events\n- ~~Legacy dashboard~~ replaced with modern interface\n- Advanced `API endpoints` for developers\n\n*Questions? Email us at support@techflecks.com*';
+
+console.log('🔤 Original Markdown:');
+console.log(markdownText);
+console.log();
+
+const convertedMarkdown = TelegramMarkdownParser.convertToTelegramMarkdownV2(markdownText);
+console.log('📱 Telegram MarkdownV2 Output:');
+console.log(convertedMarkdown);
+console.log();
+
+// Example 2: HTML conversion
+console.log('🌐 Example 2: HTML to Telegram Conversion');
+console.log('--------------------------------------------------');
+
+const htmlText = '<h1>🎉 Black Friday Sale!</h1>\n<p>Get <strong>70% OFF</strong> on all <em>TechFlecks Premium</em> plans!</p>\n<ul>\n<li><u>Priority support</u> (24/7 availability)</li>\n<li><code>Advanced API access</code> with higher limits</li>\n</ul>\n<p>🚀 <a href="https://techflecks.com/pricing">Upgrade Now</a></p>';
+
+console.log('🏷️  Original HTML:');
+console.log(htmlText);
+console.log();
+
+const convertedHtml = TelegramMarkdownParser.convertHtmlToTelegramMd(htmlText);
+console.log('📱 Telegram MarkdownV2 Output:');
+console.log(convertedHtml);
+console.log();
+
+// Example 3: Special character escaping
+console.log('⚡ Example 3: Special Character Escaping');
+console.log('--------------------------------------------------');
+
+const textWithSpecialChars = 'System Alert: Database connection failed!\n\nError Details:\n- Server: db.techflecks.com:5432\n- Status: Connection timeout (30s)\n- Code: ECONNREFUSED\n\nActions Required:\n1. Check server status\n2. Contact DevOps: devops@techflecks.com';
+
+console.log('⚠️  Original Text (with special characters):');
+console.log(textWithSpecialChars);
+console.log();
+
+const escapedText = TelegramMarkdownParser.escapeForTelegram(textWithSpecialChars);
+console.log('🔒 Escaped for Telegram:');
+console.log(escapedText);
+console.log();
+
+// Example 4: Format validation
+console.log('✅ Example 4: Format Validation');
+console.log('--------------------------------------------------');
+
+const validTelegramFormat = '*Welcome to TechFlecks\\!*\n\n_Thank you for choosing our platform\\._\n\nHere\'s what you can do:\n\\- Browse our __documentation__\n\\- Try our `sample code`\n\\- Contact support';
+
+const invalidTelegramFormat = '*Unmatched bold formatting\n_Missing closing italic\n**Double asterisk bold**\nUnescaped special chars: . ! - ( )\n[Incomplete link](https://example';
+
+console.log('✅ Testing Valid Format:');
+console.log(validTelegramFormat.substring(0, 100) + '...');
+console.log();
+
+const validationResult = TelegramMarkdownParser.validateTelegramMarkdown(validTelegramFormat);
+console.log('📊 Validation Result:');
+console.log('   Valid: ' + (validationResult.isValid ? '✅' : '❌'));
+console.log('   Errors: ' + validationResult.errors.length);
+console.log('   Warnings: ' + validationResult.warnings.length);
+console.log('   Suggestions: ' + validationResult.suggestions.length);
+console.log();
+
+console.log('❌ Testing Invalid Format:');
+console.log(invalidTelegramFormat);
+console.log();
+
+const invalidValidationResult = TelegramMarkdownParser.validateTelegramMarkdown(invalidTelegramFormat);
+console.log('📊 Validation Result:');
+console.log('   Valid: ' + (invalidValidationResult.isValid ? '✅' : '❌'));
+console.log('   Errors: ' + invalidValidationResult.errors.length);
+console.log('   Warnings: ' + invalidValidationResult.warnings.length);
+console.log('   Suggestions: ' + invalidValidationResult.suggestions.length);
+
+if (invalidValidationResult.errors.length > 0) {
+    console.log('   Error Details:');
+    invalidValidationResult.errors.forEach((error, index) => {
+        console.log('     ' + (index + 1) + '. ' + error);
+    });
+}
+console.log();
+
+// Example 5: Programmatic usage
+console.log('💻 Example 5: Programmatic Usage in Your Code');
+console.log('--------------------------------------------------');
+
+console.log('// Import the parser');
+console.log('const TelegramMarkdownParser = require(\'@techflecks/n8n-nodes-telegram-markdown-parser\');');
+console.log();
+console.log('// Convert markdown');
+console.log('const telegramText = TelegramMarkdownParser.convertToTelegramMarkdownV2(\'**Hello** *world*!\');');
+console.log();
+console.log('// Escape special characters');
+console.log('const safeText = TelegramMarkdownParser.escapeForTelegram(\'Price: $19.99!\');');
+console.log();
+console.log('// Validate format');
+console.log('const validation = TelegramMarkdownParser.validateTelegramMarkdown(\'*bold* _italic_\');');
+console.log();
+console.log('// Use in your Telegram bot');
+console.log('bot.sendMessage(chatId, telegramText, { parse_mode: \'MarkdownV2\' });');
+console.log();
+
+// Performance metrics
+console.log('📈 Performance Metrics:');
+console.log('------------------------------');
+
+const performanceTests = [
+    { name: 'Short text (50 chars)', text: '**Bold** *italic* text with `code` formatting.', iterations: 5000 },
+    { name: 'Medium text (500 chars)', text: markdownText.substring(0, 500), iterations: 1000 },
+    { name: 'Long text (1000+ chars)', text: markdownText + ' ' + htmlText, iterations: 500 }
+];
+
+performanceTests.forEach(testCase => {
+    const startTime = process.hrtime.bigint();
+
+    for (let i = 0; i < testCase.iterations; i++) {
+        TelegramMarkdownParser.convertToTelegramMarkdownV2(testCase.text);
     }
+
+    const endTime = process.hrtime.bigint();
+    const totalTimeMs = Number(endTime - startTime) / 1_000_000;
+    const avgTimeMs = totalTimeMs / testCase.iterations;
+    const throughput = Math.round(1000 / avgTimeMs);
+
+    console.log('📊 ' + testCase.name + ':');
+    console.log('   ' + testCase.iterations + ' iterations in ' + totalTimeMs.toFixed(2) + 'ms');
+    console.log('   Average: ' + avgTimeMs.toFixed(3) + 'ms per conversion');
+    console.log('   Throughput: ' + throughput.toLocaleString() + ' conversions/second');
+    console.log();
 });
 
-// Demonstrate escaping
-console.log('\n\n6. Escaping Demo');
-console.log('━'.repeat(50));
-const unsafeText = samples[4].text; // The special characters sample
-const escapedText = MarkdownV2Parser.escapeMarkdownV2(unsafeText);
-console.log(`📝 Unsafe: ${unsafeText}`);
-console.log(`🛡️  Escaped: ${escapedText}`);
+console.log('🎯 Summary:');
+console.log('--------------------');
+console.log('✅ TechFlecks Telegram Markdown Parser provides:');
+console.log('   • Fast and reliable markdown conversion');
+console.log('   • Comprehensive HTML support');
+console.log('   • Safe character escaping for Telegram');
+console.log('   • Detailed format validation');
+console.log('   • High-performance processing');
+console.log();
 
-// Validate the escaped text
-const escapedValidation = MarkdownV2Parser.validateMarkdownV2(escapedText);
-console.log(`✅ Escaped is valid: ${escapedValidation.isValid}`);
+console.log('📦 Installation:');
+console.log('   npm install @techflecks/n8n-nodes-telegram-markdown-parser');
+console.log();
 
-console.log('\n\n🎉 Demo completed! This package is ready for use in n8n workflows.');
-console.log('\n📚 For more examples, check the examples/ directory');
-console.log('🔗 GitHub: https://github.com/TechFlecks/n8n-nodes-telegram-markdownv2-parser');
-console.log('💼 Company: TechFlecks - Make by You Product Suite');
+console.log('🔗 Resources:');
+console.log('   📚 Documentation: https://github.com/TechFlecks/n8n-nodes-telegram-markdown-parser');
+console.log('   🐛 Issues: https://github.com/TechFlecks/n8n-nodes-telegram-markdown-parser/issues');
+console.log('   📧 Support: support@techflecks.com');
+console.log('   🌐 Website: https://www.techflecks.com');
+console.log();
+
+console.log('🎉 Standalone demo completed!');
+console.log('💡 Try the interactive demo: npm run demo');

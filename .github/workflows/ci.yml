@@ -1,0 +1,188 @@
+# TechFlecks Telegram Markdown Parser - Continuous Integration
+#
+# Copyright © 2025 TechFlecks  
+# Licensed under TechFlecks Software License Agreement v1.0
+#
+# This workflow runs on every push and pull request to ensure code quality
+
+name: 🧪 Continuous Integration
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - 'docs/**'
+  
+  pull_request:
+    branches: [main, master, develop]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+      - 'docs/**'
+
+env:
+  NODE_VERSION: '20.15'
+
+jobs:
+  # Job 1: Code Quality & Testing
+  test:
+    name: 🧪 Test & Quality Check
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: ['20.15', '21.x', '22.x']
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci
+          npm audit --audit-level=moderate
+
+      - name: 🧹 Code Quality Checks
+        run: |
+          echo "🔍 Running ESLint..."
+          npx eslint nodes package.json || true
+          
+          echo "🎯 Running Prettier Check..."
+          npx prettier --check nodes demo*.js index.js || true
+
+      - name: 🔨 Build Project
+        run: |
+          echo "🏗️ Building TypeScript..."
+          npm run build
+
+      - name: 🧪 Run Tests
+        run: |
+          echo "🧪 Running unit tests..."
+          npm test
+
+      - name: 📜 Validate TechFlecks License
+        run: |
+          echo "📜 Checking TechFlecks license compliance..."
+          npm run validate-license
+
+      - name: 🚀 Test Demo Scripts
+        run: |
+          echo "🎯 Testing demo functionality..."
+          timeout 30s npm run demo || true
+          timeout 30s npm run demo-standalone || true
+
+  # Job 2: Security Audit
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔒 Security Audit
+        run: |
+          echo "🔍 Running security audit..."
+          npm audit --audit-level=moderate
+          
+          echo "🔎 Checking for known vulnerabilities..."
+          npx audit-ci --moderate
+
+  # Job 3: Build Verification
+  build-test:
+    name: 🔨 Build Verification
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔨 Test Build Process
+        run: |
+          echo "🏗️ Testing TypeScript compilation..."
+          npm run build
+          
+          echo "📦 Verifying build output..."
+          ls -la dist/
+          
+          echo "🔍 Testing package creation..."
+          npm pack --dry-run
+
+      - name: 📊 Bundle Analysis
+        run: |
+          echo "📊 Analyzing bundle size..."
+          npx bundlesize || true
+
+  # Job 4: Cross-Platform Testing
+  cross-platform:
+    name: 🌐 Cross-Platform Test
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: ['20.15']
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔨 Build Project
+        run: npm run build
+
+      - name: 🧪 Run Tests
+        run: npm test
+
+      - name: 📜 License Validation
+        run: npm run validate-license
+
+# Workflow Summary:
+# ================
+# This CI workflow ensures code quality on every push/PR:
+#
+# 🧪 Test & Quality - Runs on multiple Node.js versions
+# 🔒 Security Audit - Checks for vulnerabilities  
+# 🔨 Build Verification - Ensures clean builds
+# 🌐 Cross-Platform - Tests on Linux, Windows, macOS
+#
+# Triggers on:
+# - Push to main/master/develop branches
+# - Pull requests to main/master/develop branches
+# - Excludes documentation-only changes
+#
+# Contact: support@techflecks.com

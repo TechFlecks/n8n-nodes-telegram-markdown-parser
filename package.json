@@ -1,24 +1,26 @@
 {
-  "name": "@techflecks/n8n-nodes-telegram-markdownv2-parser",
+  "name": "@techflecks/n8n-nodes-telegram-markdown-parser",
   "version": "1.0.0",
-  "description": "n8n node for parsing Telegram Markdown V2 format - part of Make by You product suite",
+  "description": "TechFlecks Telegram Markdown Parser - Convert standard markdown to Telegram MarkdownV2 format",
   "keywords": [
     "n8n-community-node-package",
     "telegram",
     "markdown",
     "parser",
-    "techflecks"
+    "techflecks",
+    "telegram-markdownv2",
+    "converter"
   ],
-  "license": "MIT",
-  "homepage": "https://github.com/TechFlecks/n8n-nodes-telegram-markdownv2-parser#readme",
+  "license": "TechFlecks-1.0",
+  "homepage": "https://github.com/TechFlecks/n8n-nodes-telegram-markdown-parser#readme",
   "author": {
     "name": "TechFlecks",
     "email": "support@techflecks.com",
-    "url": "https:/www.techflecks.com"
+    "url": "https://www.techflecks.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TechFlecks/n8n-nodes-telegram-markdownv2-parser.git"
+    "url": "https://github.com/TechFlecks/n8n-nodes-telegram-markdown-parser.git"
   },
   "engines": {
     "node": ">=20.15"
@@ -28,12 +30,21 @@
     "build": "npx rimraf dist && tsc && gulp build:icons",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm build && npm lint -c .eslintrc.prepublish.js nodes credentials package.json",
+    "lint": "eslint nodes package.json",
+    "lintfix": "eslint nodes package.json --fix",
+    "prepublishOnly": "npm run build && npm run test && npm run validate-license",
     "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
     "demo": "node demo.js",
-    "demo-standalone": "node demo-standalone.js"
+    "demo-standalone": "node demo-standalone.js",
+    "validate-license": "node validate-license.js",
+    "security-audit": "npm audit --audit-level=moderate",
+    "check-updates": "npx npm-check-updates",
+    "update-deps": "npx npm-check-updates -u && npm install",
+    "release": "npm run build && npm run test && npm run validate-license && npm publish",
+    "prepack": "npm run build",
+    "verify": "npm run build && npm run test && npm run validate-license && npm run security-audit"
   },
   "files": [
     "dist"
@@ -42,7 +53,7 @@
     "n8nNodesApiVersion": 1,
     "credentials": [],
     "nodes": [
-      "dist/nodes/TelegramMarkdownV2Parser/TelegramMarkdownV2Parser.node.js"
+      "dist/nodes/TelegramMarkdownParser/TelegramMarkdownParser.node.js"
     ]
   },
   "devDependencies": {

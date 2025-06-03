@@ -201,7 +201,16 @@ export class NodeName implements INodeType {
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the **TechFlecks Software License Agreement v1.0**. 
+
+All contributions become part of the TechFlecks software ecosystem and are subject to our licensing terms. See [LICENSE.md](LICENSE.md) for complete details.
+
+### Contributor License Agreement
+
+- Contributions must be your original work
+- You retain copyright to your contributions
+- TechFlecks gains rights to use, modify, and distribute your contributions
+- All contributions will carry TechFlecks attribution and license terms
 
 ---
 

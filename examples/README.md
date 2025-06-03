@@ -1,5 +1,12 @@
 # Usage Examples
 
+<!--
+TechFlecks Telegram Markdown Parser - Usage Examples
+Copyright © 2025 TechFlecks Technologies
+Licensed under TechFlecks Software License Agreement v1.0
+For license terms, see ../LICENSE.md
+-->
+
 This directory contains examples of how to use the TechFlecks n8n Telegram Markdown V2 Parser.
 
 ## Basic Usage Examples

@@ -4,17 +4,17 @@
 
 The **TechFlecks Software License Agreement v1.0** allows you to:
 
-✅ **Use freely** for personal, educational, and commercial purposes
-✅ **Modify** the software for your own needs
-✅ **Include** in larger applications and workflows
+✅ **Use freely** for personal, educational, and commercial purposes  
+✅ **Modify** the software for your own needs  
+✅ **Include** in larger applications and workflows  
 
 ## Important Restrictions
 
-❌ **Cannot copy or redistribute** as standalone product
-❌ **Cannot** remove TechFlecks branding or attribution
-❌ **Cannot** reverse engineer for competing products
-❌ **Cannot** use TechFlecks trademarks without consent
-❌ **Cannot** create derivative works for redistribution
+❌ **Cannot copy or redistribute** as standalone product  
+❌ **Cannot** remove TechFlecks branding or attribution  
+❌ **Cannot** reverse engineer for competing products  
+❌ **Cannot** use TechFlecks trademarks without consent  
+❌ **Cannot** create derivative works for redistribution  
 
 ## Enterprise Usage
 
